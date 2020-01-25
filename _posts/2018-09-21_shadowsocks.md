@@ -5,6 +5,7 @@ tags: linux
 permalink: shadowsocks-client
 keywords: 
 rId: MB-18092101
+shadow: true
 ---
 
 基于Ubuntu 18.04测试，这里记录的是Ubuntu客户端使用代理的方式，服务端搭建代理服务器的移步  

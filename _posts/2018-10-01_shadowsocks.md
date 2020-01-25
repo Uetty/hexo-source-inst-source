@@ -5,6 +5,7 @@ tags: linux
 permalink: shadowsocks-server
 keywords: 
 rId: MB-18100101
+shadow: true
 ---
 
 基于Ubuntu 18.04 / Ubuntu 16.04测试，这里记录的是代理服务器的搭建，需要有一台境外的linux(各种发行版本的都行，只要能安装docker)服务器
