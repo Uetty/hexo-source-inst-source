@@ -103,7 +103,7 @@ File => Settings... => Keymap页面中：输入框输入用于匹配文字，输
 
 ## 快捷键配置导入导出
 
-快捷键配置文件位置[快捷键配置](../static/Vince Style.xml)
+快捷键配置文件位置[快捷键配置](../static/Vince-Style.xml)
 
 ```
 Linux：~/.IdeaIC2019.1/config/keymaps/
