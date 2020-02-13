@@ -4,7 +4,7 @@ date: 2020-01-08 19:02:24
 tags: api
 permalink: gitlab-api
 keywords: gitlab, api
-rId: MB-2020010801
+rId: MB-20010801
 ---
 
 ## 认证([官网文档地址](https://docs.gitlab.com/ee/api/README.html#authentication))
