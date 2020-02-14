@@ -57,7 +57,7 @@ GET /search/repositories
 **参数**
 
 |   Name   |   Type   |                         Description                          |
-| :------: | :------: | :----------------------------------------------------------: |
+| ------ | ------ | ---------------------------------------------------------- |
 |   `q`    | `string` | **Required**. The query contains one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as GitHub.com. To learn more about the format of the query, see [Constructing a search query](https://developer.github.com/v3/search/#constructing-a-search-query). See "[Searching for repositories](https://help.github.com/articles/searching-for-repositories/)" for a detailed list of qualifiers. |
 |  `sort`  | `string` | Sorts the results of your query by number of `stars`, `forks`, or `help-wanted-issues` or how recently the items were `updated`. Default: [best match](https://developer.github.com/v3/search/#ranking-search-results) |
 | `order`  | `string` | Determines whether the first search result returned is the highest number of matches (`desc`) or lowest number of matches (`asc`). This parameter is ignored unless you provide `sort`. Default: `desc` |
@@ -126,7 +126,7 @@ GET /search/commits
 **参数**
 
 |   Name   |   Type   |                         Description                          |
-| :------: | :------: | :----------------------------------------------------------: |
+| ------ | ------ | ---------------------------------------------------------- |
 |   `q`    | `string` | **Required**. The query contains one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as GitHub.com. To learn more about the format of the query, see [Constructing a search query](https://developer.github.com/v3/search/#constructing-a-search-query). See "[Searching commits](https://help.github.com/articles/searching-commits/)" for a detailed list of qualifiers. |
 |  `sort`  | `string` | Sorts the results of your query by `author-date` or `committer-date`. Default: [best match](https://developer.github.com/v3/search/#ranking-search-results) |
 | `order`  | `string` | Determines whether the first search result returned is the highest number of matches (`desc`) or lowest number of matches (`asc`). This parameter is ignored unless you provide `sort`. Default: `desc` |
@@ -157,7 +157,7 @@ GET /search/code
 **参数**
 
 |   Name   |   Type   |                         Description                          |
-| :------: | :------: | :----------------------------------------------------------: |
+| ------ | ------ | ---------------------------------------------------------- |
 |   `q`    | `string` | **Required**. The query contains one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as GitHub.com. To learn more about the format of the query, see [Constructing a search query](https://developer.github.com/v3/search/#constructing-a-search-query). See "[Searching code](https://help.github.com/articles/searching-code/)" for a detailed list of qualifiers. |
 |  `sort`  | `string` | Sorts the results of your query. Can only be `indexed`, which indicates how recently a file has been indexed by the GitHub search infrastructure. Default: [best match](https://developer.github.com/v3/search/#ranking-search-results) |
 | `order`  | `string` | Determines whether the first search result returned is the highest number of matches (`desc`) or lowest number of matches (`asc`). This parameter is ignored unless you provide `sort`. Default: `desc` |
@@ -187,7 +187,7 @@ GET /search/issues
 **参数**
 
 |   Name   |   Type   |                         Description                          |
-| :------: | :------: | :----------------------------------------------------------: |
+| ------ | ------ | ---------------------------------------------------------- |
 |   `q`    | `string` | **Required**. The query contains one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as GitHub.com. To learn more about the format of the query, see [Constructing a search query](https://developer.github.com/v3/search/#constructing-a-search-query). See "[Searching issues and pull requests](https://help.github.com/articles/searching-issues-and-pull-requests/)" for a detailed list of qualifiers. |
 |  `sort`  | `string` | Sorts the results of your query by the number of `comments`, `reactions`, `reactions-+1`, `reactions--1`, `reactions-smile`, `reactions-thinking_face`, `reactions-heart`, `reactions-tada`, or `interactions`. You can also sort results by how recently the items were `created` or `updated`, Default: [best match](https://developer.github.com/v3/search/#ranking-search-results) |
 | `order`  | `string` | Determines whether the first search result returned is the highest number of matches (`desc`) or lowest number of matches (`asc`). This parameter is ignored unless you provide `sort`. Default: `desc` |
@@ -211,7 +211,7 @@ GET /search/users
 **参数**
 
 |   Name   |   Type   |                         Description                          |
-| :------: | :------: | :----------------------------------------------------------: |
+| ------ | ------ | ---------------------------------------------------------- |
 |   `q`    | `string` | **Required**. The query contains one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as GitHub.com. To learn more about the format of the query, see [Constructing a search query](https://developer.github.com/v3/search/#constructing-a-search-query). See "[Searching users](https://help.github.com/articles/searching-users/)" for a detailed list of qualifiers. |
 |  `sort`  | `string` | Sorts the results of your query by number of `followers` or `repositories`, or when the person `joined` GitHub. Default: [best match](https://developer.github.com/v3/search/#ranking-search-results) |
 | `order`  | `string` | Determines whether the first search result returned is the highest number of matches (`desc`) or lowest number of matches (`asc`). This parameter is ignored unless you provide `sort`. Default: `desc` |
@@ -235,7 +235,7 @@ GET /search/topics
 **参数**
 
 |   Name   |   Type   |                         Description                          |
-| :------: | :------: | :----------------------------------------------------------: |
+| ------ | ------ | ---------------------------------------------------------- |
 |   `q`    | `string` | **Required**. The query contains one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as GitHub.com. To learn more about the format of the query, see [Constructing a search query](https://developer.github.com/v3/search/#constructing-a-search-query). |
 | per_page |   int    |                           max 100                            |
 |   page   |   int    |                           1-based                            |
@@ -258,7 +258,7 @@ GET /search/labels
 **参数**
 
 |      Name       |   Type    |                         Description                          |
-| :-------------: | :-------: | :----------------------------------------------------------: |
+| ------------- | ------- | ---------------------------------------------------------- |
 | `repository_id` | `integer` |           **Required**. The id of the repository.            |
 |       `q`       | `string`  | **Required**. The search keywords. This endpoint does not accept qualifiers in the query. To learn more about the format of the query, see [Constructing a search query](https://developer.github.com/v3/search/#constructing-a-search-query). |
 |     `sort`      | `string`  | Sorts the results of your query by when the label was `created` or `updated`. Default: [best match](https://developer.github.com/v3/search/#ranking-search-results) |
