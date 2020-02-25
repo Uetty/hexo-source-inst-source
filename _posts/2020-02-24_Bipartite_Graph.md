@@ -4,7 +4,7 @@ title: 从二分图开始到最大匹配
 date: 2020-02-23 14:22:00
 tags: 图论
 permalink: character-set-encoding
-keywords: 最小覆盖, 最大匹配，最大独立集
+keywords: 最小覆盖, 最大匹配, 最大独立集
 rId: MB-20022301
 ---
 
