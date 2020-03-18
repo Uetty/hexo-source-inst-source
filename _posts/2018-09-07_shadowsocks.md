@@ -1,7 +1,7 @@
 ---
 title: Ubuntu shadowsocks 客户端代理记录（本地端用ubuntu setting替代chrome浏览器插件）
 date: 2018-09-07 23:44:29
-tags: linux
+tags: ShadowSocks
 permalink: shadowsocks
 keywords: 
 rId: MB-18090701

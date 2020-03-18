@@ -1,7 +1,7 @@
 ---
 title: shadowsocks docker 镜像实现代理 - 服务端（搭建代理服务器）
 date: 2018-10-01 14:12:30
-tags: linux
+tags: ShadowSocks
 permalink: shadowsocks-server
 keywords: 
 rId: MB-18100101

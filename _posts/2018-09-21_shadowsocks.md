@@ -1,7 +1,7 @@
 ---
 title: shadowsocks docker 镜像实现代理 - 客户端（Ubuntu电脑访问服务器使用代理）
 date: 2018-09-21 23:39:07
-tags: linux
+tags: ShadowSocks
 permalink: shadowsocks-client
 keywords: 
 rId: MB-18092101
