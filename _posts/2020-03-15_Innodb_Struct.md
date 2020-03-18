@@ -1,7 +1,7 @@
 ---
 title: 了解InnoDB体系架构
 date: 2020-03-15 23:47:19
-tags: mysql
+tags: MYSQL
 permalink: innodb-struct
 keywords: innodb, buffer, mysql
 rId: MB-20031501
