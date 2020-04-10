@@ -46,7 +46,7 @@ rId: MB-20040701
 
 ```
 SimpleRemoteConfigure configure = new SimpleRemoteConfigure();
-configure.setKeyPrefix("lockinst");
+configure.setKeyPrefix("yourLockInstanceName");
 configure.setServerHost("127.0.0.1");
 DistributedLock distributedLock = new DistributedLock(configure);
 try {
@@ -54,7 +54,9 @@ try {
     // TODO 业务代码
     // ...
 } finally {
-    lock.unlock();
+    if (lock != null) {
+        lock.unlock();
+    }
 }
 ```
 
