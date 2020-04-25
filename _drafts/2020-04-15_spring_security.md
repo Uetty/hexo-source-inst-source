@@ -204,6 +204,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 > 特别要注意的是不要在`UserDetailsService`中通过new直接生成`BCryptPasswordEncoder`类的实例，因为Security内部默认是使用`DelegatingPasswordEncoder`类进行密码加密的，这样会导致与`UserDetailsService`中的加密方式不一致。通过注解申明了`BCryptPasswordEncoder`之后，Security内部也就会换成该加密方式。
 > 而且，即使在已经注解声明了`BCryptPasswordEncoder`的情况下，`UserDetailsService`中也不要使用new的方式使用，因为`BCryptPasswordEncoder`内部会默认随机生成加盐字符串，同一个类的不同实例，加盐字符串不一样，加密出来的结果自然也会是不一样的。
 
+
+
+
+
 ## （三）自定义登录接口的响应返回值
 
 有时候我们需要判断是接口请求还是页面请求来定义返回json还是页面，就需要自定义响应内容。自定义登录响应有两种方法，一种就是像第二节案例(Ⅰ)一样，将成功的url和失败的url指向controller接口处理。
@@ -392,10 +396,47 @@ public class PreLoginFilter extends OncePerRequestFilter {
     }
 }
 ```
+## （五）自定义授权
 
-## Spring Security拥有的其他特性
+Security授权主要由投票管理器和投票器来决定是否获得权限。Security默认提供的投票管理器中可能有多个投票器，如`org.springframework.security.access.vote.AbstractAccessDecisionManager`中代码所示：
 
-## CSRF安全
+**org.springframework.security.access.vote.AbstractAccessDecisionManager.class**
+
+```
+public abstract class AbstractAccessDecisionManager implements AccessDecisionManager,
+		InitializingBean, MessageSourceAware {
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private List<AccessDecisionVoter<? extends Object>> decisionVoters;
+	
+	// 其他代码略
+	... 
+}
+```
+
+投票器可以投赞成票、反对票和弃权票，分别对应数值1、-1、0。多个投票器会有多种不同的投票结果，最终的结果是授权还是拒绝，由投票管理器决定。
+
+Security提供了三种投票管理器：
+
+1. 基于肯定的投票管理器(`AffirmativeBased`) —— 一个及以上赞成票视为投票通过（security默认配置了这种）
+2. 基于一致肯定的投票管理器(`UnanimousBased`) —— 没有拒绝票且有赞成的情况下通过
+3. 基于共识的投票管理器(`ConsensusBased`) —— 赞成票数大于拒绝票数的情况下通过
+
+这三个投票管理器，均有一个布尔类型的属性可以设置是否允许全部弃权，如果允许，在全部弃权的情况下最终视为投票通过。特殊的，对于`ConsensusBased`投票管理器，还有一个额外的布尔值用于设定是否允许通过票与拒绝票相同，如果允许，那么两边票数相同的情况也视为投票通过。
+
+一般情况下，这三种投票管理器已经能够满足我们的需求了，不需要重新再写，我们只需要定义一个投票器即可。Security提供了几种投票器：
+
+1. RoleVoter：默认匹配前缀字符串ROLE_的Config
+2. 
+
+
+
+
+
+
+## （六） Spring Security拥有的其他特性
+
+### （Ⅰ）CSRF安全
 
 #### 什么是CSRF攻击
 
@@ -436,5 +477,5 @@ http.csrf().disable();
 
 
 
-### OAUTH
+### （Ⅱ）OAUTH
 

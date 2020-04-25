@@ -106,7 +106,8 @@ File => Settings... => Keymap页面中：搜索输入框用于输入匹配文字
 快捷键配置文件通常在如下位置（可以有多个文件，且配置文件名字也无明显要求）
 ```
 Linux：~/.IdeaIC2019.1/config/keymaps/
-Windows：C:\Users\Administrator/.IdeaIC2019.1/config/keymaps/
+Windows(2019版本)：C:/Users/Administrator/.IdeaIC2019.1/config/keymaps/
+Windows(2020版本)：C:/Users/Administrator/AppData/Roaming/JetBrains/IdeaIC2020.1/keymaps/
 ```
 配置文件（[我的配置文件](../static/Vince-Style.xml)）复制到上述相应目录后，重新启动IDEA，在快捷键配置页面（File => Settings... => Keymap）下拉框中即会增加新导入的配置文件，选中即可使用
 

@@ -1,0 +1,88 @@
+<keymap version="1" name="Vince-Style-2020" parent="$default">
+  <action id="$ShowTranslationDialogAction" />
+  <action id="Arrangement.Rule.Match.Condition.Move.Down" />
+  <action id="Arrangement.Rule.Match.Condition.Move.Up" />
+  <action id="Back">
+    <mouse-shortcut keystroke="button4" />
+    <keyboard-shortcut first-keystroke="alt left" />
+  </action>
+  <action id="ChangesView.Diff" />
+  <action id="ChangesView.UnshelveSilently" />
+  <action id="CodeCompletion">
+    <keyboard-shortcut first-keystroke="alt slash" />
+  </action>
+  <action id="CompareTwoFiles" />
+  <action id="Diff.NextChange" />
+  <action id="Diff.PrevChange" />
+  <action id="Diff.ShowDiff" />
+  <action id="EditorDeleteLine">
+    <keyboard-shortcut first-keystroke="ctrl d" />
+  </action>
+  <action id="EditorDuplicate" />
+  <action id="EditorDuplicateLines">
+    <keyboard-shortcut first-keystroke="ctrl down" />
+  </action>
+  <action id="EditorLookupDown" />
+  <action id="EditorScrollDown" />
+  <action id="EditorSelectWord" />
+  <action id="FileChooser.GotoDesktop" />
+  <action id="FileChooser.TogglePathShowing" />
+  <action id="Find">
+    <keyboard-shortcut first-keystroke="ctrl f" />
+  </action>
+  <action id="FindInPath">
+    <keyboard-shortcut first-keystroke="ctrl p" />
+  </action>
+  <action id="FindUsages">
+    <keyboard-shortcut first-keystroke="ctrl u" />
+  </action>
+  <action id="Forward">
+    <mouse-shortcut keystroke="button5" />
+    <keyboard-shortcut first-keystroke="alt right" />
+  </action>
+  <action id="GotoSuperMethod" />
+  <action id="GuiDesigner.Duplicate" />
+  <action id="HippieCompletion" />
+  <action id="IntroduceVariable">
+    <keyboard-shortcut first-keystroke="alt enter" />
+  </action>
+  <action id="MethodDown" />
+  <action id="MethodOverloadSwitchDown" />
+  <action id="MethodUp" />
+  <action id="MoveStatementDown">
+    <keyboard-shortcut first-keystroke="alt down" />
+  </action>
+  <action id="MoveStatementUp">
+    <keyboard-shortcut first-keystroke="alt up" />
+  </action>
+  <action id="NextTab" />
+  <action id="OptimizeImports">
+    <keyboard-shortcut first-keystroke="shift ctrl o" />
+  </action>
+  <action id="ParameterInfo">
+    <keyboard-shortcut first-keystroke="alt p" />
+  </action>
+  <action id="PreviousTab" />
+  <action id="ProjectRefreshAction" />
+  <action id="ReformatCode">
+    <keyboard-shortcut first-keystroke="shift ctrl f" />
+  </action>
+  <action id="RunDashboard.CopyConfiguration" />
+  <action id="SearchEverywhere">
+    <keyboard-shortcut first-keystroke="ctrl w" />
+  </action>
+  <action id="SearchEverywhere.NavigateToNextGroup">
+    <keyboard-shortcut first-keystroke="page_down" />
+  </action>
+  <action id="SearchEverywhere.NavigateToPrevGroup">
+    <keyboard-shortcut first-keystroke="page_up" />
+  </action>
+  <action id="SendEOF" />
+  <action id="ShowContent" />
+  <action id="ShowSearchHistory" />
+  <action id="ShowUsages">
+    <keyboard-shortcut first-keystroke="ctrl alt u" />
+  </action>
+  <action id="XDebugger.CopyWatch" />
+  <action id="openAssertEqualsDiff" />
+</keymap>
