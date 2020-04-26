@@ -7,7 +7,11 @@ keywords: idea, 快捷键, 配置
 rId: MB-19051801
 ---
 
+主要基于2019版本，2020以后版本略有不同
+
 ##  快捷键偏好设置
+
+冒号右边是我的习惯配置
 
 1. 查找(Keymap -> Main Menu -> Edit -> Find -> Find...) ：Ctrl + F    【速记：find】 
 2. 复制上一行到下一行(Keymap -> Edit Actions -> Duplicate Entire Lines) ： Ctrl + 向下箭头 
@@ -26,8 +30,8 @@ rId: MB-19051801
 15. 定位到声明代码(Keymap -> Main Menu -> Navigate -> Declaration)：Ctrl + Button1 Click
 16. 删除Java文件不用的依赖(Keymap -> Main Menu -> Code -> Optimize Imports)：Ctrl + Shift + O
 17. 显示参数列表(Keymap  -> Main Menu -> View -> Parameter Info)：Alt + P    【速记：parameter】 
-
-18. 取消双击shift更改为其他键(双击shift -> Actions)：输入registry... >> 其后选择点击`registry...`项 >> 找到`ide.suppress.double.click.handler`键名，右边打勾禁止双击shift处理 >> close >> 设置新快捷键(File => Settings... -> Keymap -> Other -> Search Everywhere不是文件夹项)：Ctrl + W    【速记：watch或where】 
+18. 代码自动生成(Keymap -> Main Menu -> Code -> Generate...)：Alt + Shift + Enter
+19. 取消双击shift更改为其他键(双击shift -> Actions)：输入registry... >> 其后选择点击`registry...`项 >> 找到`ide.suppress.double.click.handler`键名，右边打勾禁止双击shift处理 >> close >> 设置新快捷键(File => Settings... -> Keymap -> Other -> Search Everywhere不是文件夹项)：Ctrl + W    【速记：watch或where】 
 
 CTRL为基础组合键，与ALT相关的组合键通常是代码修改的辅助有关
 
@@ -109,7 +113,7 @@ Linux：~/.IdeaIC2019.1/config/keymaps/
 Windows(2019版本)：C:/Users/Administrator/.IdeaIC2019.1/config/keymaps/
 Windows(2020版本)：C:/Users/Administrator/AppData/Roaming/JetBrains/IdeaIC2020.1/keymaps/
 ```
-配置文件（[我的配置文件](../static/Vince-Style.xml)）复制到上述相应目录后，重新启动IDEA，在快捷键配置页面（File => Settings... => Keymap）下拉框中即会增加新导入的配置文件，选中即可使用
+配置文件（[我的配置文件](../static/Vince-Style.xml)、[我的配置文件2020版](../static/Vince-Style-2020.xml)）复制到上述相应目录后，重新启动IDEA，在快捷键配置页面（File => Settings... => Keymap）下拉框中即会增加新导入的配置文件，选中即可使用
 
 3. **项目太大，文件列表太长怎么办**
 
