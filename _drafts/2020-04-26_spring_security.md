@@ -1,10 +1,10 @@
-# Spring Security 踩坑
+# SpringBoot下使用Security踩坑
 
 该文基于SpringBoot版本2.1.8.RELEASE，案例仓库以后有空时整理后补上。
 
-## （一）配置URL规则
+## （一）配置文件简单示例
 
-继承WebSecurityConfigureAdapter类，加上@EnableWebSecurity注解，并实现configure方法（注意这个方法有三种入参形式，下面只是其中一种，后面的篇幅中会看到另外一种）
+继承WebSecurityConfigureAdapter类，加上@EnableWebSecurity注解，并实现configure方法（注意这个方法有三种入参形式，下面只是其中一种，后面的篇幅中会看到另外一种），下面只是一个简单的配置文件，仅配置了一些简单的URL路径相关的权限。
 
 **SecurityConfigure.class**
 
@@ -25,13 +25,15 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 }
 ```
 
+
+
 ## （二）设置登录接口
 
-spring security已经帮你完成了登录验证的代码，无需再在controller中进行编码
+spring security已经帮你完成了登录验证的代码，无需再在controller中进行编码。
+
+该部分前两个案例意义不大，建议可以直接跳（Ⅲ）案例。
 
 ### （Ⅰ）最简陋且无意义的登录配置案例
-
-前两个案例意义不大，可以直接跳第三个案例，第三个看完有疑问再回来结合前两个案例看看能不能理解。
 
 该案例与上面一样，配置在实现`WebSecurityConfigureAdapter`接口的类中，如下所示：
 
@@ -44,32 +46,29 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
     	// 这里为了测试方便暂时先禁用csrf
         http.csrf().disable();
-		http.authorizeRequests()
-				// 允许这些路径不用验证
-				.antMatchers("/test", "/static").permitAll()
-				// 拥有其中一项权限即可
-                // 这种方式设置，"USER"权限与UserDetails的Authorities中"USER"匹配
-				// .antMatchers("/user/**").hasAnyAuthority("USER", "ADMIN")
-				// 这种方式设置，"USER"权限与UserDetails的Authorities中"ROLE_USER"匹配
-				.antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-				// 其余的路径都需要登录
-				.anyRequest().authenticated();
-				// 实际还会有其他设置，这里不列出
-				.and()
-                .formLogin()
-                // 登录页面地址（也即判断请求未登录验证时，重定向到的页面）
-                .loginPage("/login")
-                // 登录接口路径
-                .loginProcessingUrl("/api/guard/login")
-                // 登录成功后重定向到的页面地址
-                .defaultSuccessUrl("/index")
-                // 登录失败时重定向到的页面
-                .failureUrl("/login-error")
-                // 登录接口传递用户名的参数名
-                .usernameParameter("username")
-                // 登录接口传递密码的参数名
-                .passwordParameter("password")
-                ;
+		http
+			.authorizeRequests()
+			// 拥有其中一项权限即可，"USER"权限与UserDetails的Authorities中"USER"匹配
+			// .antMatchers("/api/user/**").hasAnyAuthority("USER", "ADMIN")
+			// 其余的路径都需要登录
+			.anyRequest().authenticated();
+			// 上面是权限相关的配置，后面第五部分详细介绍
+			
+			.and()
+            .formLogin()
+            // 登录页面地址（也即判断请求未登录验证时，重定向到的页面）
+            .loginPage("/login")
+            // 登录接口路径
+            .loginProcessingUrl("/api/guard/login")
+            // 登录成功后重定向到的页面地址
+            .defaultSuccessUrl("/index")
+            // 登录失败时重定向到的页面
+            .failureUrl("/login-error")
+            // 登录接口传递用户名的参数名
+            .usernameParameter("username")
+            // 登录接口传递密码的参数名
+            .passwordParameter("password")
+            ;
 	}
 }
 ```
@@ -135,7 +134,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 ### （Ⅲ）真正有意义的登录案例
 
-这个案例，是我们真正常用的，先看代码吧。
+这个案例，是我们真正常用的，直接看配置吧。
 
 **SecurityConfigure.class**
 
@@ -206,8 +205,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
 
-
-
 ## （三）自定义登录接口的响应返回值
 
 有时候我们需要判断是接口请求还是页面请求来定义返回json还是页面，就需要自定义响应内容。自定义登录响应有两种方法，一种就是像第二节案例(Ⅰ)一样，将成功的url和失败的url指向controller接口处理。
@@ -232,11 +229,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
     	// 这里为了测试方便暂时先禁用csrf
         http.csrf().disable();
-		http.authorizeRequests()
-				// 下面跟第二节的(Ⅰ)案例一样
-				...
-				// 上面跟第二节的(Ⅰ)案例一样
-                .formLogin()
+		http.formLogin()
                 // 登录页面地址
                 .loginPage("/login")
                 // 登录接口路径
@@ -396,9 +389,11 @@ public class PreLoginFilter extends OncePerRequestFilter {
     }
 }
 ```
-## （五）自定义授权
+## （五）权限认证的配置及自定义
 
-Security授权主要由投票管理器和投票器来决定是否获得权限。Security默认提供的投票管理器中可能有多个投票器，如`org.springframework.security.access.vote.AbstractAccessDecisionManager`中代码所示：
+### （Ⅰ）权限模型
+
+Security授权主要由访问决策管理器来决定是否获得权限。Security默认提供的访问决策管理器中可能有多个投票器，如`org.springframework.security.access.vote.AbstractAccessDecisionManager`中代码所示：
 
 **org.springframework.security.access.vote.AbstractAccessDecisionManager.class**
 
@@ -414,22 +409,212 @@ public abstract class AbstractAccessDecisionManager implements AccessDecisionMan
 }
 ```
 
-投票器可以投赞成票、反对票和弃权票，分别对应数值1、-1、0。多个投票器会有多种不同的投票结果，最终的结果是授权还是拒绝，由投票管理器决定。
+投票器可以投赞成票、反对票和弃权票，分别对应数值1、-1、0。多个投票器会有多种不同的投票结果，最终的结果是授权还是拒绝，由访问决策管理器决定。
 
-Security提供了三种投票管理器：
+### （Ⅱ）访问决策管理器
 
-1. 基于肯定的投票管理器(`AffirmativeBased`) —— 一个及以上赞成票视为投票通过（security默认配置了这种）
-2. 基于一致肯定的投票管理器(`UnanimousBased`) —— 没有拒绝票且有赞成的情况下通过
-3. 基于共识的投票管理器(`ConsensusBased`) —— 赞成票数大于拒绝票数的情况下通过
+Security提供了三种访问决策管理器：
+
+1. 基于肯定的访问决策管理器(`AffirmativeBased`) —— 一个及以上赞成票视为投票通过，Security默认使用的就是这个。
+2. 基于一致肯定的访问决策管理器(`UnanimousBased`) —— 没有拒绝票且有赞成的情况下通过
+3. 基于共识的访问决策管理器(`ConsensusBased`) —— 赞成票数大于拒绝票数的情况下通过
 
 这三个投票管理器，均有一个布尔类型的属性可以设置是否允许全部弃权，如果允许，在全部弃权的情况下最终视为投票通过。特殊的，对于`ConsensusBased`投票管理器，还有一个额外的布尔值用于设定是否允许通过票与拒绝票相同，如果允许，那么两边票数相同的情况也视为投票通过。
 
-一般情况下，这三种投票管理器已经能够满足我们的需求了，不需要重新再写，我们只需要定义一个投票器即可。Security提供了几种投票器：
+一般情况下，这三种投票管理器已经能够满足我们的需求了，不需要重新再写，我们只需要选择一个使用即可。如有需要，自定义的决策管理器需要实现`org.springframework.security.access.AccessDecisionManager`接口，也可以继承抽象类`org.springframework.security.access.vote.AbstractAccessDecisionManager`，该抽象类实现了决策管理器接口，前面权限模型中说到的投票器概念就是在该抽象类中引入的。在配置类中设置决策管理器的配置方法如下：
 
-1. RoleVoter：默认匹配前缀字符串ROLE_的Config
-2. 
+```
+// 该配置位于上面提到的SecurityConfigure.class文件中
+http.authorizeRequests()
+	.accessDecisionManager(accessDecisionManager);
+```
+
+### （Ⅲ）投票器
+
+Security默认提供了几种投票器：`RoleVoter`、`PreInvocationAuthorizationAdviceVoter`、`AuthenticatedVoter`、`Jsr250Voter`、`WebExpressionVoter`。Springboot中Security默认使用的是`WebExpressionVoter`投票器（对于大部分应用只需要关心这种配置方式即可，原因见后一段）。
 
 
+
+有一个比较麻烦且一直没找到解决方案的问题：在Springboot的Java方式配置中，不使用`WebExpressionVoter`情况下，使用其他投票器，暂时没找到简单有效的Java代码配置方式。在使用XML方式配置的Spring项目中，不使用`WebExpressionVoter`是可以做到的，只需要额外指定`<http use-expressions="false">`即可。
+
+在`org.springframework.security.config.http.HttpConfigurationBuilder`类中可以看到对XML文件中`use-expressions`解析的源码，有需要且有足够时间研究的前提下，可以参考源码研究Java配置方式（我有稍微看了一点，大概不是很容易，因为XML方式配置和Java方式配置上有很大的不同）。
+
+
+
+在保留使用`WebExpressionVoter`情况下，增加其他投票器，还是可以做到配置的，但实际上意义是不大的。因为，**`WebExpressionVoter`本身就能够做到覆盖其他投票器的功能**。保留`WebExpressionVoter`情况下，增加其他投票器的配置方式如下：
+
+**SecurityConfigure.class**
+
+```
+@EnableWebSecurity
+public class SecurityConfigure extends WebSecurityConfigurerAdapter {
+	... 其他配置略
+	
+    public AffirmativeBased affirmativeBased() {
+        List<AccessDecisionVoter<?>> collect = new ArrayList<>();
+        // 这里出于方便以增加RoleVoter投票器为例，实际使用中替换为自定义投票器
+        RoleVoter roleVoter = new RoleVoter(); 
+        collect.add(roleVoter);
+        
+        WebExpressionVoter webExpressionVoter = new WebExpressionVoter();
+        collect.add(webExpressionVoter);
+        return new AffirmativeBased(collect);
+    }
+    
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+    	... 其他配置略
+    	http.authorizeRequests()
+    			// Security中没法单独添加投票器，所以需要通过将决策管理器替换的方式
+                .accessDecisionManager(affirmativeBased())
+    	... 其他配置略
+    }
+	... 其他配置略
+}
+```
+
+#### ① RoleVoter
+
+基于角色的投票器，在`UserDetailsService`中通过`loadUserByUsername`方法我们获取了用户信息，同时也会返回`GrantedAuthority`列表，`RoleVoter`的权限控制便是基于`GrantedAuthority`列表进行判定的。
+
+#### ② WebExpressionVoter
+
+该投票器可以通过表达式进行权限验证，它可以使用内置的表达式，也可以自定义解析代码。
+
+它有多种配置代码，像这样：
+
+```
+http.authorizeRequests()
+	// 对/api/**下所有路径放行
+	.antMatchers("/api/login").permitAll();
+```
+
+像这样：
+
+```
+http.authorizeRequests()
+    .antMatchers("/api/login","/api/forgetPassword").permitAll()
+    // 需要USER角色或ADMIN角色，分别与GrantedAuthority的"ROLE_USER"、"ROLE_ADMIN"匹配
+    .antMatchers("/api/**").hasAnyRole("USER","ADMIN")
+	// 剩余路径，需要登陆才能访问
+	.anyRequest().authenticated();
+```
+
+像这样：
+
+```
+http.authorizeRequests()
+	// 需要ADMIN权限，与GrantedAuthority中的"ADMIN"匹配
+	.antMatchers("/api/admin/**").hasAuthority("ADMIN")
+	// 需要 STAFF角色 且 IP地址段满足给定值
+	.antMatchers("/api/staff/**").access("hasRole('STAFF') and hasIpAddress('192.168.1.0/24')");
+```
+
+像这样限定权限
+
+```
+http.authorizeRequests()
+	// 需要读用户的权限
+	.antMatchers("/api/user/list").access("hasPermission('user', 'read')")
+	// 需要读特定文件的权限
+	.antMatchers("/api/file/{fileId}").access("hasPermission(#fileId, 'file', 'read')");
+```
+
+在上面的表达式中，`hasPermission`需要自己定义，如下所示，有需要定义的方法有两个，分别对应上面调用的两个方法，可以发现表达式中都默认省略的第一个参数，因为它是必定会传递的
+
+```
+@Component
+public class MyPermissionEvaluator implements PermissionEvaluator {
+    @Override
+    public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
+        // 自定义逻辑
+        return true;
+    }
+    @Override
+    public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
+        // 自定义逻辑
+        return true;
+    }
+}
+```
+
+还可以有更丰富的自定义表达式计算器
+
+```
+http.authorizeRequests()
+    // 使用自定义表达式计算
+    .antMatchers("/api/**")
+    .access("@myExpressionInterceptor.eval1(authentication,request)")
+	// 使用自定义表达式计算，且提取路径中的值，并作为参数传给计算函数
+    .antMatchers("/api/user/{userId}")
+    .access("@myExpressionInterceptor.eval2(authentication,request,#userId)");
+```
+
+对于自定义的表达式计算器，只需要按需要定义表达式计算类
+
+**MyExpressionInterceptor.class**
+
+```
+@Component
+public class MyExpressionInterceptor {
+
+    public boolean eval1(Authentication authentication, HttpServletRequest request) {
+        // 自定义逻辑
+        return true;
+    }
+
+    public boolean eval2(Authentication authentication, HttpServletRequest request, String id) {
+        // 自定义逻辑
+        return true;
+    }
+}
+```
+
+`WebExpressionVoter`强大的功能，加上可以自定义表达式计算，已经基本上可以解决大部分的场景了，一般情况下是没有新增其他的投票器的必要了。
+
+### （Ⅳ）使用注解
+
+在Spring Security中，是可以使用注解的，只需要开启注解即可
+
+```
+@EnableWebSecurity
+// 允许使用注解
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+public class SecurityConfigure extends WebSecurityConfigurerAdapter {
+
+...
+}
+```
+
+这样，就可以在方法或者类中使用`@Secured`和`@PreAuthorize`，如下所示
+
+```
+public interface BankService {
+
+@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+public Account readAccount(Long id);
+
+@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+public Account[] findAccounts();
+
+@Secured("ROLE_TELLER")
+public Account post(Account account, double amount);
+}
+```
+
+```
+public interface BankService {
+
+@PreAuthorize("isAnonymous()")
+public Account readAccount(Long id);
+
+@PreAuthorize("isAnonymous()")
+public Account[] findAccounts();
+
+@PreAuthorize("hasAuthority('ROLE_TELLER')")
+public Account post(Account account, double amount);
+}
+```
 
 
 
@@ -478,4 +663,6 @@ http.csrf().disable();
 
 
 ### （Ⅱ）OAUTH
+
+后面补上
 
