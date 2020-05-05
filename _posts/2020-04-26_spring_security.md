@@ -7,7 +7,7 @@ keywords: spring-security, 配置
 rId: MB-20042601
 ---
 
-该文基于SpringBoot版本2.1.8.RELEASE，案例仓库以后有空时整理后补上。
+该文基于SpringBoot版本2.1.8.RELEASE，测试代码仓库地址：[https://github.com/Uetty/spring-boot-clean/tree/security](https://github.com/Uetty/spring-boot-clean/tree/security)，主要在security命名的分支之下，可以点到release查看代码案例列表，或拉取整个仓库代码在IDE中直观地查看所有分支提交历史。
 
 ## （一）配置文件简单示例
 
@@ -15,7 +15,7 @@ rId: MB-20042601
 
 **SecurityConfigure.class**
 
-```
+```java
 @EnableWebSecurity
 public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 	@Override
@@ -34,7 +34,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 
 
-## （二）设置登录接口
+## （二）登录功能
 
 spring security已经帮你完成了登录验证的代码，无需再在controller中进行编码。
 
@@ -46,7 +46,7 @@ spring security已经帮你完成了登录验证的代码，无需再在controll
 
 **SecurityConfigure.class**
 
-```
+```java
 @EnableWebSecurity
 public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 	@Override
@@ -66,7 +66,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
             // 登录页面地址（也即判断请求未登录验证时，重定向到的页面）
             .loginPage("/login")
             // 登录接口路径
-            .loginProcessingUrl("/api/guard/login")
+            .loginProcessingUrl("/api/login")
             // 登录成功后重定向到的页面地址
             .defaultSuccessUrl("/index")
             // 登录失败时重定向到的页面
@@ -93,7 +93,7 @@ Using generated security password: f31ad0b3-5247-4a2a-864c-b6a3e4a0b936
 登录测试，是POST请求，在POST MAN中大概就是这样
 
 ```
-http://localhost:9090/api/guard/login
+http://localhost:9090/api/login
 form表单参数如下
 username: user
 password: f31ad0b3-5247-4a2a-864c-b6a3e4a0b936
@@ -105,13 +105,17 @@ password: f31ad0b3-5247-4a2a-864c-b6a3e4a0b936
 
 **这个案例并不实用，仅有的一点意义是展示一下security跳转地址的配置以及登录参数名的配置。**
 
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-login-1.0](https://github.com/Uetty/spring-boot-clean/tree/security-login-1.0)
+
+代码版本：[https://github.com/Uetty/spring-boot-clean/releases/tag/security-login-1.0](https://github.com/Uetty/spring-boot-clean/releases/tag/security-login-1.0)
+
 ### （Ⅱ）增加一点配置的仍旧无意义登录配置案例
 
 在这个案例中，将自动生成的密码改成了代码中写死的密码。配置如下：
 
 **SecurityConfigure.class**
 
-```
+```java
 @EnableWebSecurity
 public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 	@Override
@@ -139,13 +143,31 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 **这个案例同样意义不大，仅有的意义大概就是展示了一下Spring内存对密码是有加密的特性**
 
-### （Ⅲ）真正有意义的登录案例
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-login-1.1](https://github.com/Uetty/spring-boot-clean/tree/security-login-1.1)
 
-这个案例，是我们真正常用的，直接看配置吧。
+### （Ⅲ）自定义登录验证
+
+Security使用了Servlet规范的过滤器与过滤链来组织自身的结构，整个Security框架主要功能由多个过滤器堆叠串联而成，每个过滤器负责了一个功能。如Session持久化层过滤器、请求头处理过滤器、登出逻辑处理过滤器、缓存处理层过滤器等，一般会有至少十一个过滤器存在。登录处理层也是其中的一个过滤器，一般置于登出处理过滤器之后，位于第5位。
+
+在登录层，较常使用的是`UsernamePasswordAuthenticationFilter`过滤器，即基于用户名密码的过滤器。为了能够满足多种多样的需求，Security在`UsernamePasswordAuthenticationFilter`过滤器内部的不同层次均暴露了接口，框架使用者能够根据需要自定义实现任意某一层的接口，下面基于它介绍各层接口：
+
+1. **AbstractAuthenticationProcessingFilter**：`UsernamePasswordAuthenticationFilter`类本身并没有负责太多的事情，大部分代码都是继承于它的父级抽象类`AbstractAuthenticationProcessingFilter`。`UsernamePasswordAuthenticationFilter`最关键的作用在于定义了`Authentication`实例的类型，该类型决定了该登录过滤器能通过哪些`AuthenticationProvider`（下面介绍）获取登录认证。而父级抽象类`AbstractAuthenticationProcessingFilter`，则是登录逻辑的实际执行者，这样设计的好处在于，父级抽象类定义的逻辑可以被多个登录过滤器共用。
+
+2. **AuthenticationManager**：`AbstractAuthenticationProcessingFilter`中的登录逻辑主要委托给了`AuthenticationManager`认证管理器接口，**默认的认证管理器接口的实现类是`ProviderManager`认证提供者管理器类**。
+
+3. **AuthenticationProvider**：`ProviderManager`认证提供者管理器类，顾名思义，管理了多个认证提供者`AuthenticationProvider`。前面说过`UsernamePasswordAuthenticationFilter`定义了`Authentication`实例的类型，这个类型在这里起到了作用：每一个认证提供者可能支持给当前的登录过滤器提供认证也可能不支持，是否支持的判定就是由`Authentication`实例的类型决定。遇到任意一个认证提供者`AuthenticationProvider`支持提供认证，并且判定认证成功，均判定为登录成功。
+
+4. **UserDetailsService**：默认配置下，认证提供者管理类下面存在一个名为`DaoAuthenticationProvider`的认证提供者，该提供者负责了获取用户、验证用户密码（并且内存中加密存储）、更新用户密码加密结果、缓存用户信息等功能。对于获取用户功能，`DaoAuthenticationProvider`是委托给**`UserDetailsService`**接口根据用户名获取用户信息，用户密码的加密上是委托`PasswordEncoder`接口管理，更新用户密码加密结果功能上，先由`PasswordEncoder`判定是否需要更新加密值，如果需要更新再委托`UserDetailsPasswordService`完成更新加密值（默认不更新），至于缓存功能，由`UserCache`接口负责（默认无缓存）。
+
+上面我们了解了`UsernamePasswordAuthenticationFilter`下的各层次接口，我们就可以通过重新自定义实现这些接口来满足我们实际的生成需求。当然，如果基于用户名密码的过滤器也不能满足需要，大可以自定义登录功能的过滤器，来整体替换或添加登录逻辑。
+
+#### ① 自定义获取用户信息的UserDetailsService
+
+这里实现`UserDetailService`接口，自定义通过用户名获取用户信息的获取逻辑。
 
 **SecurityConfigure.class**
 
-```
+```java
 @EnableWebSecurity
 public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
@@ -177,7 +199,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 **UserDetailsServiceImpl.class**
 
-```
+```java
 @Component
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -202,13 +224,88 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 上面的代码，创建了实现`UserDetailsService`接口的类，并在`SecurityConfigure`类中增加用于设置`UserDetailsService`的configure方法。
 
-当每次有登录请求（前面配置的登录接口是`/api/guard/login`）进来的时候，Spring Security框架就会自动调用`UserDetailsService`的`loadUserByUsername`方法，获取正确用户名密码，并自动执行验证逻辑。登录测试案例与前面一样，就不在贴了。
+当每次有登录请求（前面配置的登录接口是`/api/login`）进来的时候，Spring Security框架就会自动调用`UserDetailsService`的`loadUserByUsername`方法，获取正确用户名密码，并自动执行验证逻辑。登录测试案例与前面一样，就不在贴了。
 
 这里需要注意的点是：
 
 > 需要用@Bean注解申明密码加密类`BCryptPasswordEncoder`，以便在`UserDetailsService`类中注入。 
 > 特别要注意的是不要在`UserDetailsService`中通过new直接生成`BCryptPasswordEncoder`类的实例，因为Security内部默认是使用`DelegatingPasswordEncoder`类进行密码加密的，这样会导致与`UserDetailsService`中的加密方式不一致。通过注解申明了`BCryptPasswordEncoder`之后，Security内部也就会换成该加密方式。
 > 而且，即使在已经注解声明了`BCryptPasswordEncoder`的情况下，`UserDetailsService`中也不要使用new的方式使用，因为`BCryptPasswordEncoder`内部会默认随机生成加盐字符串，同一个类的不同实例，加盐字符串不一样，加密出来的结果自然也会是不一样的。
+
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-login-2.1](https://github.com/Uetty/spring-boot-clean/tree/security-login-2.1)
+
+#### ② 自定义认证提供者AuthenticationProvider
+
+默认的认证提供者是`DaoAuthenticationProvider`，我们可以实现`AuthenticationProvider`接口，自定义认证提供者。我们可以根据不同的需求，决定是实现`AuthenticationProvider`接口，还是继承已经实现该接口的类。例如，假设需要在登录中限制失败的次数，可以通过继承`AbstractUserDetailsAuthenticationProvider`的方式实现，如下所示：
+
+**AuthenticationProviderImpl.class**
+
+```
+@Component
+public class AuthenticationProviderImpl extends AbstractUserDetailsAuthenticationProvider {
+    // 限制登录频率
+    private static final int MAX_FAILED_TIMES = 5;
+    private static final long FAILED_INTERVAL = 120_000L;
+
+    @Autowired
+    UserDao userDao;
+
+    @Override
+    protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
+        // 校验密码逻辑
+        String password = authentication.getCredentials().toString();
+        User user = (User) userDetails;
+        Integer loginFailedTimes = user.getLoginFailedTimes();
+        loginFailedTimes = loginFailedTimes == null ? 0 : loginFailedTimes;
+        long lastLoginTime = user.getLastLoginTime() != null ? user.getLastLoginTime().getTime() : 0L;
+        Date date = new Date();
+        // 限制登录失败频率
+        if (loginFailedTimes >= MAX_FAILED_TIMES
+                && date.getTime() - lastLoginTime < FAILED_INTERVAL) {
+            throw new BadCredentialsException("high login frequency"); // 登录频率过高
+        }
+
+        boolean passwordValid = Objects.equals(password, user.getPassword());
+        // 更新登录成功和失败信息
+        user.setLoginFailedTimes(passwordValid ? 0 : loginFailedTimes + 1);
+        user.setLastLoginTime(date);
+        user.setUpdateTime(date);
+        userDao.update(user);
+        if (!passwordValid) {
+            throw new BadCredentialsException("login failed");
+        }
+    }
+
+    @Override
+    protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
+        try {
+            User user = userDao.getByUsername(username);
+            if (user == null) {
+                throw new UsernameNotFoundException("username[" + username + "] not found");
+            }
+            return user;
+        } catch (UsernameNotFoundException ne) {
+            throw ne;
+        } catch (Exception e) {
+            throw new InternalAuthenticationServiceException(e.getMessage(), e);
+        }
+    }
+}
+```
+
+**SecurityConfigure.class**配置文件
+
+```
+    ... 其他代码省略
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        // 设置自定义AuthenticationProvider
+        auth.authenticationProvider(authenticationProvider);
+    }
+    ... 其他代码省略
+```
+
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-login-2.2](https://github.com/Uetty/spring-boot-clean/tree/security-login-2.2)
 
 
 
@@ -222,7 +319,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 **SecurityConfigure.class**
 
-```
+```java
 @EnableWebSecurity
 public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
@@ -240,7 +337,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
                 // 登录页面地址
                 .loginPage("/login")
                 // 登录接口路径
-                .loginProcessingUrl("/api/guard/login2")
+                .loginProcessingUrl("/api/login")
                 // 登录接口入参名称
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -264,7 +361,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 **AccessDeniedHandlerImpl.class**
 
-```
+```java
 /**
  * 无权限情况下的返回值处理
  */
@@ -311,7 +408,7 @@ public class AccessDeniedHandlerImpl implements AuthenticationEntryPoint, Access
 
 **AuthenticationHandler.class**
 
-```
+```java
 /**
  * 登录成功/失败时的响应处理
  */
@@ -342,17 +439,15 @@ public class AuthenticationHandler implements AuthenticationFailureHandler, Auth
 
 这种配置的情况下，有一个好处是`AuthenticationFailureHandler`可以根据前面抛出的异常来判定失败原因，具体决定给前端的响应状态码。
 
-## （四）如何做验证码校验
+## （四）添加自定义Fiter
 
-做验证码校验，一种方法是在`UserDetailsServiceImpl`中做验证码的校验，如果验证码错误直接抛出异常，到登录失败处理器中处理该异常，这种方法的不好之处在于，Security会打印非`UsernameNotFoundException`异常，造成日志文件中异常信息过多，但这种方法也很方便。
-
-第二种方式，是在`UsernamePasswordAuthenticationFilter`前增加一个自定义的过滤器。
+有时候，现有Filter不能满足我们的实际需要，我们需要添加自定义的filter，如：添加验证码校验功能的filter时，需要在`UsernamePasswordAuthenticationFilter`前增加一个自定义的过滤器。
 
 代码配置如下：
 
 **SecurityConfigure.class**
 
-```
+```java
 @EnableWebSecurity
 public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 	// 增加两行过滤器有关的代码，其他不变
@@ -373,7 +468,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 **PreLoginFilter.class**
 
-```
+```java
 /**
  * 登录前置过滤器，可以拿来做验证码校验
  */
@@ -404,7 +499,7 @@ Security授权主要由访问决策管理器来决定是否获得权限。Securi
 
 **org.springframework.security.access.vote.AbstractAccessDecisionManager.class**
 
-```
+```java
 public abstract class AbstractAccessDecisionManager implements AccessDecisionManager,
 		InitializingBean, MessageSourceAware {
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -430,7 +525,7 @@ Security提供了三种访问决策管理器：
 
 一般情况下，这三种投票管理器已经能够满足我们的需求了，不需要重新再写，我们只需要选择一个使用即可。如有需要，自定义的决策管理器需要实现`org.springframework.security.access.AccessDecisionManager`接口，也可以继承抽象类`org.springframework.security.access.vote.AbstractAccessDecisionManager`，该抽象类实现了决策管理器接口，前面权限模型中说到的投票器概念就是在该抽象类中引入的。在配置类中设置决策管理器的配置方法如下：
 
-```
+```java
 // 该配置位于上面提到的SecurityConfigure.class文件中
 http.authorizeRequests()
 	.accessDecisionManager(accessDecisionManager);
@@ -452,7 +547,7 @@ Security默认提供了几种投票器：`RoleVoter`、`PreInvocationAuthorizati
 
 **SecurityConfigure.class**
 
-```
+```java
 @EnableWebSecurity
 public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 	... 其他配置略
@@ -484,13 +579,17 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 基于角色的投票器，在`UserDetailsService`中通过`loadUserByUsername`方法我们获取了用户信息，同时也会返回`GrantedAuthority`列表，`RoleVoter`的权限控制便是基于`GrantedAuthority`列表进行判定的。
 
-#### ② WebExpressionVoter
+#### ② AuthenticatedVoter
+
+基于匿名(`IS_AUTHENTICATED_ANONYMOUSLY`)、记住身份(`IS_AUTHENTICATED_REMEMBERED`)、完全验证(`IS_AUTHENTICATED_FULLY`)三种状态判断的投票器。匿名状态即未登录的状态，匿名状态下，获取到的`Authentication`是`AnonymousAuthenticationToken`的实例。记住身份状态为通过自动登录功能登录后的状态，自动登录状态下，获取到的Authentication是自动登录产生的`RememberMeAuthenticationToken`实例。自动登录功能默认是没有的，需要增加`RememberMeAuthenticationFilter`过滤器，配置中可以将它添加到`UsernamePasswordAuthenticationFilter`之后）。完全验证即已经登陆的状态，即既非匿名状态又非记住身份状态，如果登录模块是基于`UsernamePasswordAuthenticationFilter`实现的，那么在已登录情况下获取到的是`Authentication`是`UsernamePasswordAuthenticationToken`的实例。
+
+#### ③ WebExpressionVoter
 
 该投票器可以通过表达式进行权限验证，它可以使用内置的表达式，也可以自定义解析代码。
 
-它有多种配置代码，像这样：
+它可以通过多种配置代码进行配置，像这样：
 
-```
+```java
 http.authorizeRequests()
 	// 对/api/**下所有路径放行
 	.antMatchers("/api/login").permitAll();
@@ -498,7 +597,7 @@ http.authorizeRequests()
 
 像这样：
 
-```
+```java
 http.authorizeRequests()
     .antMatchers("/api/login","/api/forgetPassword").permitAll()
     // 需要USER角色或ADMIN角色，分别与GrantedAuthority的"ROLE_USER"、"ROLE_ADMIN"匹配
@@ -509,7 +608,7 @@ http.authorizeRequests()
 
 像这样：
 
-```
+```java
 http.authorizeRequests()
 	// 需要ADMIN权限，与GrantedAuthority中的"ADMIN"匹配
 	.antMatchers("/api/admin/**").hasAuthority("ADMIN")
@@ -519,7 +618,7 @@ http.authorizeRequests()
 
 像这样限定权限
 
-```
+```java
 http.authorizeRequests()
 	// 需要读用户的权限
 	.antMatchers("/api/user/list").access("hasPermission('user', 'read')")
@@ -527,9 +626,9 @@ http.authorizeRequests()
 	.antMatchers("/api/file/{fileId}").access("hasPermission(#fileId, 'file', 'read')");
 ```
 
-在上面的表达式中，`hasPermission`需要自己定义，如下所示，有需要定义的方法有两个，分别对应上面调用的两个方法，可以发现表达式中都默认省略的第一个参数，因为它是必定会传递的
+在上面的表达式中，`hasPermission`需要自己定义，只要实现`PermissionEvaluator`接口并注册到spring容器中即可。如下所示，需要定义的方法有两个，分别对应上面调用的两个方法，可以发现上面的表达式中都默认省略的第一个参数，因为它是必定会传递的。
 
-```
+```java
 @Component
 public class MyPermissionEvaluator implements PermissionEvaluator {
     @Override
@@ -545,9 +644,9 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
 }
 ```
 
-还可以有更丰富的自定义表达式计算器
+除了能够使用`hasPermission`之外，还可以有更丰富的自定义表达式计算器
 
-```
+```java
 http.authorizeRequests()
     // 使用自定义表达式计算
     .antMatchers("/api/**")
@@ -561,7 +660,7 @@ http.authorizeRequests()
 
 **MyExpressionInterceptor.class**
 
-```
+```java
 @Component
 public class MyExpressionInterceptor {
 
@@ -577,13 +676,13 @@ public class MyExpressionInterceptor {
 }
 ```
 
-`WebExpressionVoter`强大的功能，加上可以自定义表达式计算，已经基本上可以解决大部分的场景了，一般情况下是没有新增其他的投票器的必要了。
+`WebExpressionVoter`强大的功能，加上可以自定义表达式计算器，已经基本上可以解决大部分的场景了，一般情况下是没有新增其他的投票器的必要了。
 
 ### （Ⅳ）使用注解
 
 在Spring Security中，是可以使用注解的，只需要开启注解即可
 
-```
+```java
 @EnableWebSecurity
 // 允许使用注解
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
@@ -595,7 +694,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 这样，就可以在方法或者类中使用`@Secured`和`@PreAuthorize`，如下所示
 
-```
+```java
 public interface BankService {
 
 @Secured("IS_AUTHENTICATED_ANONYMOUSLY")
@@ -609,7 +708,7 @@ public Account post(Account account, double amount);
 }
 ```
 
-```
+```java
 public interface BankService {
 
 @PreAuthorize("isAnonymous()")
@@ -623,7 +722,7 @@ public Account post(Account account, double amount);
 }
 ```
 
-
+通过注解方式配置的Security，默认的Voter不再一定是`WebExpressionVoter`，根据项目内包含的注解的不同，会有所不同。
 
 
 ## （六） Spring Security拥有的其他特性
@@ -632,25 +731,25 @@ public Account post(Account account, double amount);
 
 #### 什么是CSRF攻击
 
-浏览器对于向同一个网站的请求，会保持请求头封装的Cookie字段内容的一致性。服务器端权限认证大都基于此（即使后端采用的是Session——Session实际上就是请求头Cookie字段内的jsession字段），如果当前Cookie所代表的用户已经登录则不再需要进行登录，否则会被要求进行登录。浏览器对Cookie的处理，大大方便了前端的开发。正常的登录业务下，这是没有什么问题的，但如果涉及到转账等其他敏感业务，没有进行其他的安全策略包护，就会存在安全性问题。
+浏览器对于向同一个网站的请求，会保持请求头封装的Cookie字段内容的一致性。服务器端权限认证大都基于此（即使后端采用的是Session——Session实际上就是请求头Cookie字段内的jsession字段），如果当前Cookie所代表的用户已经登录则不再需要进行登录，否则会被要求进行登录。浏览器对Cookie的处理，大大方便了前端的开发。正常的登录业务下，这是没有什么问题的，但如果涉及到转账等其他敏感业务，没有进行其他的安全策略保护，就会存在安全性问题。
 
-假设存在这样的一个情境，网站A是恶意网站，网站B是一个支付网站，且支付所需的校验仅仅只是通过session判断用户是否登录。某个用户U登录了网站B，并在登录期间又浏览了恶意网站A，恶意网站A上有一个按钮，封装了向网站A的账户转账的请求参数。用户U点击了这个按钮，浏览器页面会从恶意网站A跳转到网站B执行转账的业务，由于网站B已经登录，浏览器发送给网站B服务器的Session被检测为已登录，所以网站B执行了这个转账操作。在这个案例中，转账显然不是用户的意愿，而是被恶意网站劫持所导致，更要命的是，恶意网站A实际上可以连这个按钮都不需要，只要在后台运行一段JavaScript脚本就能达到目的。
+假设存在这样的一个情境，网站A是恶意网站，网站B是一个支付网站，且支付所需的校验仅仅只是通过session判断用户是否登录。某个用户U登录了网站B，并在登录期间又浏览了恶意网站A，恶意网站A上有一个按钮，封装了向网站A的钱包账户转账的请求参数。用户U点击了这个按钮，浏览器页面会从恶意网站A跳转到网站B执行转账的业务，由于网站B已经登录，浏览器发送给网站B服务器的Session被检测为已登录（转账权限验证通过），所以网站B执行了这个转账操作。在这个案例中，转账显然不是用户的意愿，而是被恶意网站劫持所导致，更要命的是，恶意网站A实际上可以连这个按钮都不需要，只要在后台运行一段JavaScript脚本就能达到目的。
 
-上面的案例清楚的解释了什么是CSRF攻击，这个攻击主要依赖的便是流量器对Cookie的自动封装，试图获取用户正在浏览的信息恶意攻击者无法利用它，但一些不关心用户信息只关心操作结果的恶意攻击，确是可以利用它的。
+上面的案例清楚的解释了什么是CSRF攻击，这个攻击主要依赖的便是浏览器对Cookie的自动封装，对于试图获取用户正在浏览的信息的恶意攻击者无法利用它，但一些不关心用户信息只关心操作结果的恶意攻击，确是可以利用它的。
 
 #### 对于CSRF攻击的防范
 
-防范CSRF攻击的关键就在于，对于安全级别高的操作，后端不能仅依赖浏览器自动封装的字段进行校验。可以生成token令牌发送给前端，前端提交表单时必须包含给定的csrf token令牌。
+防范CSRF攻击的关键就在于，对于安全级别高的操作，后端不能仅依赖浏览器自动封装的字段进行校验。可以在操作前生成额外的csrf token令牌发送给前端，前端提交表单时必须在表单中包含给定的csrf token令牌。
 
-Spring Security默认是开启csrf token保护的，对于依赖模板引擎的前后端不分离的页面，Spring Security会在给前端的登录页面表单上自动设置包含名为_csrf的input标签，也可以在模板引擎中手动设置像下面input标签这样的存储csrf token参数的位置。
+Spring Security默认是开启csrf token保护的，对于依赖模板引擎（如`thymeleaf`、`JSP`）的前后端不分离的页面，Spring Security会在给前端的登录页面表单上自动设置包含名为_csrf的input标签，也可以在模板引擎中手动设置像下面input标签这样的存储csrf token参数的位置。
 
-```
+```xml
 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 ```
 
 在前端页面head的meta位置设置csrf字段也是可行的，浏览器会在请求时自动将meta中的字段和值封装到http head中，与Cookie不一样的是，meta是必须当前页面发起的请求才会有的，所以不会有Cookie那样的问题。
 
-```
+```xml
 <html>
 <head>
     <meta name="_csrf" content="${_csrf.token}"/>
@@ -663,7 +762,7 @@ Spring Security默认是开启csrf token保护的，对于依赖模板引擎的�
 
 实际上真正需要csrf验证的接口并不多，而且在所有页面开启CSRF的情况下，类似于从其他网站跳转到该网站的跨平台合作性业务受限。如果不需要Security的CSRF实现，可以在configure中通过如下代码关闭csrf，如第二节案例（Ⅰ）所示。类似做验证码校验一样，自定义csrf的实现，实际上是很简单的。
 
-```
+```java
 http.csrf().disable();
 ```
 
@@ -671,5 +770,107 @@ http.csrf().disable();
 
 ### （Ⅱ）OAUTH
 
-后面补上
+Security 内置了对常用网站（Google、Github、Facebook、Okta）的oauth2格式支持，对于这类网站，只需简单配置即可实现Oauth支持，下面以Github为例。
+
+**application.yml**
+
+```
+spring:
+    security:
+        oauth2:
+            client:
+                registration:
+                    github:
+                    	# 替换成自己的密钥
+                        client-id: 'your client id'
+                        client-secret: 'your client secret'
+                        
+                        client-authentication-method: basic
+                        authorization-grant-type: authorization_code
+                        redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+                        scope: 'repo public_repo user'
+                        client-name: 'github-client'
+                provider:
+                    github:
+                        user-info-uri: 'https://api.github.com/user'
+                        token-uri: 'https://github.com/login/oauth/access_token'
+                        authorization-uri: 'https://github.com/login/oauth/authorize'
+                        user-name-attribute: "email"
+```
+
+**SecurityConfigure.class**
+
+```
+	... 其他省略
+	// configure方法中添加oauth2Login()
+	@Override
+    protected void configure(HttpSecurity http) throws Exception {
+       	http.csrf().disable();
+        http
+                .authorizeRequests()
+                // 其余路径（页面）不需要认证
+                .anyRequest().permitAll()
+                .and()
+                .oauth2Login()
+                ;
+    }
+	... 其他省略
+```
+
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.1](https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.1)
+
+
+
+自带github支持，使用java方式配置如下：
+
+**SecurityConfigure.class**
+
+```
+	... 其他省略
+	@Configurable
+    static class SecurityBeanConfigure {
+        @Bean
+        public ClientRegistrationRepository clientRegistrationRepository(ClientRegistration clientRegistration) {
+            return new InMemoryClientRegistrationRepository(clientRegistration);
+        }
+
+        @Bean
+        private ClientRegistration githubClientRegistration() {
+            return ClientRegistration.withRegistrationId("github")
+                    .clientId("your client id")
+                    .clientSecret("your client secret")
+                    .clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                    .redirectUriTemplate("{baseUrl}/login/oauth2/code/{registrationId}")
+                    .scope("repo", "public_repo", "user")
+                    .authorizationUri("https://github.com/login/oauth/authorize")
+                    .tokenUri("https://github.com/login/oauth/access_token")
+                    .userInfoUri("https://api.github.com/user")
+                    .clientName("github-client")
+                    // 取userInfoUri接口返回值中的email作为userName
+                    .userNameAttributeName("email")
+//                    .userNameAttributeName("id")
+//                    .userNameAttributeName("login")
+                    .build();
+        }
+    }
+    
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable();
+        http
+                .authorizeRequests()
+                // 其余路径（页面）不需要认证
+                .anyRequest().permitAll()
+                .and()
+                .oauth2Login()
+                .clientRegistrationRepository(clientRegistrationRepository)
+                ;
+    }
+```
+
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.2](https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.2)
 
