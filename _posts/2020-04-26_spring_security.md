@@ -99,6 +99,98 @@ username: user
 password: f31ad0b3-5247-4a2a-864c-b6a3e4a0b936
 ```
 
+登录成功，返回的是index页面的内容。该文基于SpringBoot版本2.1.8.RELEASE，测试代码仓库地址：[https://github.com/Uetty/spring-boot-clean/tree/security](https://github.com/Uetty/spring-boot-clean/tree/security)，主要在security命名的分支之下，可以点到release查看代码案例列表，或拉取整个仓库代码在IDE中直观地查看所有分支提交历史。
+
+## （一）配置文件简单示例
+
+继承WebSecurityConfigureAdapter类，加上@EnableWebSecurity注解，并实现configure方法（注意这个方法有三种入参形式，下面只是其中一种，后面的篇幅中会看到另外一种），下面只是一个简单的配置文件，仅配置了一些简单的URL路径相关的权限。
+
+**SecurityConfigure.class**
+
+```java
+@EnableWebSecurity
+public class SecurityConfigure extends WebSecurityConfigurerAdapter {
+	@Override
+    protected void configure(HttpSecurity http) throws Exception {
+		http.authorizeRequests()
+				// 允许这些路径不用验证
+				.antMatchers("/test", "/static").permitAll()
+				// 这些路径需要USER角色的权限
+				.antMatchers("/user/**").hasRole("USER")
+				// 其余的路径都需要登录
+				.anyRequest().authenticated();
+				// 实际还会有其他设置，这里不列出
+	}
+}
+```
+
+
+
+## （二）登录功能
+
+spring security已经帮你完成了登录验证的代码，无需再在controller中进行编码。
+
+该部分前两个案例意义不大，建议可以直接跳（Ⅲ）案例。
+
+### （Ⅰ）最简陋且无意义的登录配置案例
+
+该案例与上面一样，配置在实现`WebSecurityConfigureAdapter`接口的类中，如下所示：
+
+**SecurityConfigure.class**
+
+```java
+@EnableWebSecurity
+public class SecurityConfigure extends WebSecurityConfigurerAdapter {
+	@Override
+    protected void configure(HttpSecurity http) throws Exception {
+    	// 这里为了测试方便暂时先禁用csrf
+        http.csrf().disable();
+		http
+			.authorizeRequests()
+			// 拥有其中一项权限即可，"USER"权限与UserDetails的Authorities中"USER"匹配
+			// .antMatchers("/api/user/**").hasAnyAuthority("USER", "ADMIN")
+			// 其余的路径都需要登录
+			.anyRequest().authenticated();
+			// 上面是权限相关的配置，后面第五部分详细介绍
+			
+			.and()
+            .formLogin()
+            // 登录页面地址（也即判断请求未登录验证时，重定向到的页面）
+            .loginPage("/login")
+            // 登录接口路径
+            .loginProcessingUrl("/api/login")
+            // 登录成功后重定向到的页面地址
+            .defaultSuccessUrl("/index")
+            // 登录失败时重定向到的页面
+            .failureUrl("/login-error")
+            // 登录接口传递用户名的参数名
+            .usernameParameter("username")
+            // 登录接口传递密码的参数名
+            .passwordParameter("password")
+            ;
+	}
+}
+```
+
+**在这种配置下，既没有指定自定义登录验证逻辑，又没有指定用户名密码，spring security会自动生成密码**，会在启动时在控制台打印如下所示（可以看到是INFO级别log，看不到的话除了可能是配置问题还要考虑日志级别问题）
+
+```
+2020-04-15 01:14:18,430 [main] o.s.b.a.s.s.UserDetailsServiceAutoConfiguration.getOrDeducePassword:83 [INFO] - 
+
+Using generated security password: f31ad0b3-5247-4a2a-864c-b6a3e4a0b936
+```
+
+前端代码是从spring官网拿的文件，是前后端不分离的thymeleaf文件（前端案例之所以是不分离，是因为security还提供了CSRF功能，这个会通过不分离的页面自动将token写入到页面，CSRF后面会说，涉及到安全的，这里不用关心），具体前端代码这里就不贴了。为了方便讲解，下面直接上POST MAN的请求解说。
+
+登录测试，是POST请求，在POST MAN中大概就是这样
+
+```
+http://localhost:9090/api/login
+form表单参数如下
+username: user
+password: f31ad0b3-5247-4a2a-864c-b6a3e4a0b936
+```
+
 登录成功，返回的是index页面的内容。
 
 上面的配置中登录权限控制，也是没问题可以用的，就不展示验证的篇幅了。
@@ -153,7 +245,9 @@ Security使用了Servlet规范的过滤器与过滤链来组织自身的结构�
 
 1. **AbstractAuthenticationProcessingFilter**：`UsernamePasswordAuthenticationFilter`类本身并没有负责太多的事情，大部分代码都是继承于它的父级抽象类`AbstractAuthenticationProcessingFilter`。`UsernamePasswordAuthenticationFilter`最关键的作用在于定义了`Authentication`实例的类型，该类型决定了该登录过滤器能通过哪些`AuthenticationProvider`（下面介绍）获取登录认证。而父级抽象类`AbstractAuthenticationProcessingFilter`，则是登录逻辑的实际执行者，这样设计的好处在于，父级抽象类定义的逻辑可以被多个登录过滤器共用。
 
-2. **AuthenticationManager**：`AbstractAuthenticationProcessingFilter`中的登录逻辑主要委托给了`AuthenticationManager`认证管理器接口，**默认的认证管理器接口的实现类是`ProviderManager`认证提供者管理器类**。
+   由于后面已经有添加自定义Filter的章节，所以通过自定义Filter的方式重写登录认证的案例这里不再提供，参考后面章节即可。自定义登录Filter要注意的是：1) 需要验证请求路径是否为登录接口；2) 处理登录成功后存储到Session中的业务逻辑，通过`http.getSharedObject(SessionAuthenticationStrategy.class);`可以获取到已注册的Session策略类，将该策略类实例设置到自定义Filter中，这样在登录成功后就可通过`sessionStrategy.onAuthentication(authResult, request, response);`方法将登录成功的用户信息更新到session中；3) Spring自身有事件通知机制，登录成功也是一种事件，如有事件监听的需要，实现`ApplicationEventPublisherAware`接口，即可获取`ApplicationEventPublisher`实例，事件推送代码参考`AbstractAuthenticationProcessingFilter.successfulAuthentication`代码； 4) 登录成功后，需要调用`SecurityContextHolder.getContext().setAuthentication(authentication)`设置认证信息。
+
+2. **AuthenticationManager**：`AbstractAuthenticationProcessingFilter`中的登录逻辑主要委托给了`AuthenticationManager`认证管理器接口，**默认的认证管理器接口的实现类是`ProviderManager`认证提供者管理器类**，`ProviderManager`允许有父级`AuthenticationManager`存在，本机`ProviderManager`不能处理的时候，才会交给父级`ProviderMananger`尝试处理。默认情况下，第一级`ProviderMananger`是负责处理`AnonymousAuthenticationToken`的`ProviderManager`，而`UsernamePasswordAuthenticationToken`是由其父级`ProviderMananger`处理。由于`AuthenticationManager`本身并没有什么功能，所以比较少会有自定义该类的需求，鉴于此，就不再介绍自定义的实现了。若需要进行自定义，配置`SecurityConfigure`中配置的方式是`auth.parentAuthenticationManager(authenticationManager);`，即设置自定义的父级`AuthenticationManager`。
 
 3. **AuthenticationProvider**：`ProviderManager`认证提供者管理器类，顾名思义，管理了多个认证提供者`AuthenticationProvider`。前面说过`UsernamePasswordAuthenticationFilter`定义了`Authentication`实例的类型，这个类型在这里起到了作用：每一个认证提供者可能支持给当前的登录过滤器提供认证也可能不支持，是否支持的判定就是由`Authentication`实例的类型决定。遇到任意一个认证提供者`AuthenticationProvider`支持提供认证，并且判定认证成功，均判定为登录成功。
 
@@ -299,7 +393,7 @@ public class AuthenticationProviderImpl extends AbstractUserDetailsAuthenticatio
     ... 其他代码省略
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // 设置自定义AuthenticationProvider
+        // 添加自定义AuthenticationProvider
         auth.authenticationProvider(authenticationProvider);
     }
     ... 其他代码省略
@@ -307,7 +401,51 @@ public class AuthenticationProviderImpl extends AbstractUserDetailsAuthenticatio
 
 案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-login-2.2](https://github.com/Uetty/spring-boot-clean/tree/security-login-2.2)
 
+#### ③ 脱离Filter体系自定义登录接口
 
+除了实现Security Filter体系暴露的接口外，还可以利用`SecurityContextHolder`来脱离Filter体系，自己实现登录controller代码（这种方式，不是很推荐）。如下所示：
+
+自定义登录的Servicer：
+
+**LoginServiceImpl.class**
+
+```
+@Service
+public class LoginServiceImpl implements LoginService {
+
+    @Autowired
+    UserDao userDao;
+
+    @Autowired
+    HttpServletRequest httpServletRequest;
+
+    AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
+
+    @Override
+    public User login(String username, String password) {
+        User user = userDao.getByUsername(username);
+        if (!Objects.equals(user.getPassword(), password)) {
+            throw new BusinessException(ResponseCode.LOGIN_FAILED);
+        }
+
+        UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
+                user, user.getPassword(),
+                user.getAuthorities());
+        result.setDetails(authenticationDetailsSource.buildDetails(httpServletRequest));
+        SecurityContextHolder.getContext().setAuthentication(result);
+        return user;
+    }
+
+    @Override
+    public void logout() {
+        SecurityContextHolder.getContext().setAuthentication(null);
+    }
+}
+```
+
+要注意的是，登录接口需要配置无需登录权限。
+
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-login-3.1](https://github.com/Uetty/spring-boot-clean/tree/security-login-3.1)
 
 ## （三）自定义登录接口的响应返回值
 
@@ -359,14 +497,14 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 新增几个类分别实现`AuthenticationFailureHandler`、`AuthenticationSuccessHandler`、`AuthenticationEntryPoint`、`AccessDeniedHandler`接口的类，如下所示：
 
-**AccessDeniedHandlerImpl.class**
+**SecurityExceptionHandler.class**
 
 ```java
 /**
  * 无权限情况下的返回值处理
  */
 @Component
-public class AccessDeniedHandlerImpl implements AuthenticationEntryPoint, AccessDeniedHandler {
+public class SecurityExceptionHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
 
 	/**
      * 没有登录的情况下访问需要登录的接口
@@ -388,7 +526,7 @@ public class AccessDeniedHandlerImpl implements AuthenticationEntryPoint, Access
         handleAccessFailed(request, response, accessDeniedException);
     }
 
-    public void handleAccessFailed(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
+    public void handleAccessFailed(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Exception e) throws IOException, ServletException {
 
         String requestURI = httpServletRequest.getRequestURI();
         if (StringUtil.startsWith(requestURI, "/api")) { // 接口请求
@@ -439,7 +577,9 @@ public class AuthenticationHandler implements AuthenticationFailureHandler, Auth
 
 这种配置的情况下，有一个好处是`AuthenticationFailureHandler`可以根据前面抛出的异常来判定失败原因，具体决定给前端的响应状态码。
 
-## （四）添加自定义Fiter
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-output-1.1](https://github.com/Uetty/spring-boot-clean/tree/security-output-1.1)
+
+## （四）添加自定义Filter
 
 有时候，现有Filter不能满足我们的实际需要，我们需要添加自定义的filter，如：添加验证码校验功能的filter时，需要在`UsernamePasswordAuthenticationFilter`前增加一个自定义的过滤器。
 
@@ -729,7 +869,7 @@ public Account post(Account account, double amount);
 
 ### （Ⅰ）CSRF安全
 
-#### 什么是CSRF攻击
+#### ① 什么是CSRF攻击
 
 浏览器对于向同一个网站的请求，会保持请求头封装的Cookie字段内容的一致性。服务器端权限认证大都基于此（即使后端采用的是Session——Session实际上就是请求头Cookie字段内的jsession字段），如果当前Cookie所代表的用户已经登录则不再需要进行登录，否则会被要求进行登录。浏览器对Cookie的处理，大大方便了前端的开发。正常的登录业务下，这是没有什么问题的，但如果涉及到转账等其他敏感业务，没有进行其他的安全策略保护，就会存在安全性问题。
 
@@ -737,7 +877,7 @@ public Account post(Account account, double amount);
 
 上面的案例清楚的解释了什么是CSRF攻击，这个攻击主要依赖的便是浏览器对Cookie的自动封装，对于试图获取用户正在浏览的信息的恶意攻击者无法利用它，但一些不关心用户信息只关心操作结果的恶意攻击，确是可以利用它的。
 
-#### 对于CSRF攻击的防范
+#### ② 对于CSRF攻击的防范
 
 防范CSRF攻击的关键就在于，对于安全级别高的操作，后端不能仅依赖浏览器自动封装的字段进行校验。可以在操作前生成额外的csrf token令牌发送给前端，前端提交表单时必须在表单中包含给定的csrf token令牌。
 
@@ -760,13 +900,73 @@ Spring Security默认是开启csrf token保护的，对于依赖模板引擎（�
 <!-- ... -->
 ```
 
-实际上真正需要csrf验证的接口并不多，而且在所有页面开启CSRF的情况下，类似于从其他网站跳转到该网站的跨平台合作性业务受限。如果不需要Security的CSRF实现，可以在configure中通过如下代码关闭csrf，如第二节案例（Ⅰ）所示。类似做验证码校验一样，自定义csrf的实现，实际上是很简单的。
+实际上真正需要csrf验证的接口并不多，而且在所有页面开启CSRF的情况下，类似于从其他网站跳转到该网站的跨平台合作性业务受限。如果不需要Security的CSRF实现，可以在configure中通过如下代码关闭csrf，如第二节案例（Ⅰ）所示。
 
 ```java
 http.csrf().disable();
 ```
 
+#### ③ 手动获取csrf token
 
+上面的介绍中，都是Security自动将token设置到生成的前端页面中，如果项目是前后端分离的，希望通过接口获取csrf token该怎么做呢。下面的配置就能够做到在接口中获取token。
+
+首先声明`CsrfTokenRepository`
+
+**SecurityConfigure.class**
+
+```
+	... 其他配置省略
+	@Configurable
+    static class SecurityBeanConfigure {
+        ... 其他配置省略
+		/**
+         * 声明CsrfTokenRepository的Bean
+         */
+        @Bean
+        public CsrfTokenRepository csrfTokenRepository() {
+            return new HttpSessionCsrfTokenRepository();
+        }
+    }
+    
+    @Autowired
+    private CsrfTokenRepository csrfTokenRepository;
+    
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+	    // 声明使用的csrfTokenRepository
+        http.csrf().csrfTokenRepository(csrfTokenRepository);
+        http
+                .authorizeRequests()
+                // 允许未登录下访问获取csrf token的接口
+                .antMatchers("/api/generateCsrf").permitAll()
+    	... 其他配置省略    
+    }
+    ... 其他配置省略    
+```
+
+**..Controller.class**
+
+```
+	... 其他代码略
+	@Autowired
+    CsrfTokenRepository csrfTokenRepository;
+    
+	@RequestMapping(value = "generateCsrf")
+    public BaseResponse<CsrfToken> generateCsrf() {
+        // 加载已经保存的token
+//        CsrfToken csrfToken = csrfTokenRepository.loadToken(httpServletRequest);
+        // 生成token
+        CsrfToken csrfToken = csrfTokenRepository.generateToken(httpServletRequest);
+        // 保存生成的token
+        csrfTokenRepository.saveToken(csrfToken, httpServletRequest, httpServletResponse);
+        return successResult(csrfToken);
+    }
+   	... 其他代码略
+```
+
+上面为了能够在controller中获取到CsrfTokenRepository的bean，我们先在SecurityConfigure中注册了这个Bean，这样在Controller中就能分别通过`generateToken`、`saveToken`、`loadToken`方法生成、保存、加载已保存的CsrfToken。
+
+案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-csrf-1.1](https://github.com/Uetty/spring-boot-clean/tree/security-csrf-1.1)
 
 ### （Ⅱ）OAUTH
 
@@ -873,4 +1073,3 @@ spring:
 ```
 
 案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.2](https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.2)
-
