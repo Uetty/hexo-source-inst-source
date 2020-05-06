@@ -9,6 +9,15 @@ rId: MB-20042601
 
 该文基于SpringBoot版本2.1.8.RELEASE，测试代码仓库地址：[https://github.com/Uetty/spring-boot-clean/tree/security](https://github.com/Uetty/spring-boot-clean/tree/security)，主要在security命名的分支之下，可以点到release查看代码案例列表，或拉取整个仓库代码在IDE中直观地查看所有分支提交历史。
 
+这篇文章能帮助你什么？如果你有如下疑问，可以尝试阅读本文，希望读完这篇文章能够对你有所帮助。
+
+1. Security如何进行登录，登录模块是否需要在Controller中完成？
+2. Security能否适应各种各样自定义的登录功能？
+3. Security是如何进行权限验证的？
+4. Security能否适应各种各样的权限验证的逻辑？
+5. 什么是CSRF攻击，Security是否支持CSRF攻击的防范？
+6. 如何利用Security自带的Oauth封装，快速搭建常见网站的（常规风格的）Oauth客户端支持？
+
 ## （一）配置文件简单示例
 
 继承WebSecurityConfigureAdapter类，加上@EnableWebSecurity注解，并实现configure方法（注意这个方法有三种入参形式，下面只是其中一种，后面的篇幅中会看到另外一种），下面只是一个简单的配置文件，仅配置了一些简单的URL路径相关的权限。
@@ -989,4 +998,5 @@ spring:
 ```
 
 案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.2](https://github.com/Uetty/spring-boot-clean/tree/security-oauth-github-1.2)
+
 
