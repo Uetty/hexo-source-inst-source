@@ -1,9 +1,9 @@
 ---
 title: SpringBoot下使用Security踩坑
 date: 2020-04-26 19:22:22
-tags: java
+tags: SPRING
 permalink: spring-security
-keywords: spring-security, 配置
+keywords: spring-security, 配置, spring, security
 rId: MB-20042601
 ---
 
