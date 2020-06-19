@@ -129,3 +129,7 @@ Windows(2020版本)：C:/Users/Administrator/AppData/Roaming/JetBrains/IdeaIC202
 1. 新导入项目，依赖下载完毕，源码仍然报错（maven各种update、clean、compile之后仍然报错）
    
    可能是由于IDEA缓存了依赖未下载前的目录信息，执行更新即可(File => Invalidate Caches / Restart...)
+
+2. 聚合项目，编译项目时会自动从远程下载依赖的本地项目
+   
+   依赖的项目没有install，有时可能是依赖最外层的父项目了，子项目可能install了，父项目没install，看错误信息的时候要仔细看看下载的jar的artifactId

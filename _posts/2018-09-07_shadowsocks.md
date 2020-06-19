@@ -9,7 +9,7 @@ shadow: true
 ---
 
 基于Ubuntu 18.04测试，这里记录的是Ubuntu客户端使用代理的方式，服务端搭建代理服务器的移步  
-Windows系统的话，已经有现成的软件（[Windows系统客户端](https://raw.githubusercontent.com/Uetty/uetty.github.io/master/blog/影梭Win.zip)），该教程也就没有意义了  
+Windows系统的话，已经有现成的软件（[Windows系统客户端](../static/MB18090701-1.zip)），该教程也就没有意义了  
 
 ## 安装
 -----------
@@ -55,7 +55,7 @@ sudo sslocal -c /etc/shadowsocks.json -d start      启动服务（以后可以�
 * cd .. && rm -rf proxychains-ng       (根据需要选择删除原来的安装源码)
 * sudo vim /etc/proxychains.conf       修改最后一行为：socks5  127.0.0.1 1080
 
-这时候，命令行终端如果需要经过代理，可以在命令前面添加：sudo proxychains4 指令，如果不想输出proxychains的日志信息可以使用：sudo proxychains4 -q，如：
+这时候，命令行终端如果需要经过代理，可以在命令前面添加：sudo proxychains4 指令，如果不想输出proxychains的日志信息可以使用`sudo proxychains4 -q`，如：
 
 > 添加docker ppa时，由于网络问题，原来的命令
 > sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
@@ -68,7 +68,6 @@ sudo sslocal -c /etc/shadowsocks.json -d start      启动服务（以后可以�
 > sudo proxychains4 apt-get update
 > sudo proxychains4 -q apt-cache madison mysql-server       (-q 安静模式，不输出proxychains4的日志)
 > sudo proxychains4 apt-get install mysql-server
-
 
 参考自：https://blog.csdn.net/lee_j_r/article/details/54019691
 主要不同点： chrome浏览器代理（修改理由：在没有代理之前，不能打开插件市场安装管理插件，因此修改了代理方式）

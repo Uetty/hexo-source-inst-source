@@ -9,8 +9,8 @@ shadow: true
 ---
 
 基于Ubuntu 18.04测试，这里记录的是Ubuntu客户端使用代理的方式，服务端搭建代理服务器的移步  
-docker 安装见 https://blog.csdn.net/Vincent_Field/article/details/82086197  
-Windows系统的话，已经有现成的软件（[影梭Win.zip](../static/MB18092101-1.zip)），该教程也就没有意义了  
+docker 安装见 [DOCKER一键入门](./2018-08-28_docker.md)
+Windows系统的话，已经有现成的软件（[影梭Win.zip](../static/MB18090701-1.zip)），该教程也就没有意义了  
 
 
 ## 镜像获取
