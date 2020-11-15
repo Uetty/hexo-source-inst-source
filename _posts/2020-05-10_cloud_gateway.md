@@ -1,4 +1,11 @@
-# Spring Cloud Gateway
+---
+title: Spring Cloud Gateway
+date: 2020-05-10 15:11:22
+tags: SPRING-CLOUD
+permalink: spring-cloud-gateway
+keywords: spring-cloud
+rId: MB-20051001
+---
 
 依赖为
 
