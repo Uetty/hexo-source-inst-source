@@ -36,7 +36,7 @@
   <action id="GotoImplementation">
     <keyboard-shortcut first-keystroke="ctrl t" />
     <keyboard-shortcut first-keystroke="ctrl alt b" />
-    <mouse-shortcut keystroke="control meta button1 doubleClick" />
+    <mouse-shortcut keystroke="control meta button1" />
   </action>
   <action id="IntroduceVariable">
     <keyboard-shortcut first-keystroke="meta enter" />
