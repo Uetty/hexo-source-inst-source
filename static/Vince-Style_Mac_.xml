@@ -1,0 +1,73 @@
+<keymap version="1" name="Vince-Style(Mac)" parent="Eclipse">
+  <action id="$ShowTranslationDialogAction" />
+  <action id="Back">
+    <keyboard-shortcut first-keystroke="alt left" />
+    <mouse-shortcut keystroke="button4" />
+    <keyboard-shortcut first-keystroke="meta left" />
+  </action>
+  <action id="CodeCompletion">
+    <keyboard-shortcut first-keystroke="meta slash" />
+  </action>
+  <action id="EditorDuplicateLines">
+    <keyboard-shortcut first-keystroke="ctrl alt down" />
+    <keyboard-shortcut first-keystroke="ctrl down" />
+  </action>
+  <action id="EditorLookupDown" />
+  <action id="EditorScrollDown" />
+  <action id="EvaluateExpression" />
+  <action id="FileChooser.TogglePathShowing" />
+  <action id="Find">
+    <keyboard-shortcut first-keystroke="ctrl f" />
+  </action>
+  <action id="FindInPath">
+    <keyboard-shortcut first-keystroke="ctrl p" />
+  </action>
+  <action id="FindUsages">
+    <keyboard-shortcut first-keystroke="ctrl u" />
+  </action>
+  <action id="Forward">
+    <keyboard-shortcut first-keystroke="alt right" />
+    <mouse-shortcut keystroke="button5" />
+    <keyboard-shortcut first-keystroke="meta right" />
+  </action>
+  <action id="Generate">
+    <keyboard-shortcut first-keystroke="shift meta enter" />
+  </action>
+  <action id="GotoImplementation">
+    <keyboard-shortcut first-keystroke="ctrl t" />
+    <keyboard-shortcut first-keystroke="ctrl alt b" />
+    <mouse-shortcut keystroke="control meta button1 doubleClick" />
+  </action>
+  <action id="IntroduceVariable">
+    <keyboard-shortcut first-keystroke="meta enter" />
+  </action>
+  <action id="MethodOverloadSwitchDown" />
+  <action id="MoveStatementDown">
+    <keyboard-shortcut first-keystroke="meta down" second-keystroke="alt down" />
+  </action>
+  <action id="MoveStatementUp">
+    <keyboard-shortcut first-keystroke="meta up" second-keystroke="alt up" />
+  </action>
+  <action id="ParameterInfo">
+    <keyboard-shortcut first-keystroke="meta p" />
+  </action>
+  <action id="Print" />
+  <action id="RenameElement">
+    <keyboard-shortcut first-keystroke="shift alt r" />
+    <keyboard-shortcut first-keystroke="shift meta r" />
+  </action>
+  <action id="Replace">
+    <keyboard-shortcut first-keystroke="ctrl r" />
+  </action>
+  <action id="RunToCursor" />
+  <action id="SearchEverywhere">
+    <keyboard-shortcut first-keystroke="ctrl g" />
+  </action>
+  <action id="SearchEverywhere.NavigateToNextGroup">
+    <keyboard-shortcut first-keystroke="page_down" />
+  </action>
+  <action id="TypeHierarchy">
+    <keyboard-shortcut first-keystroke="f4" />
+    <keyboard-shortcut first-keystroke="ctrl h" />
+  </action>
+</keymap>

@@ -19,14 +19,14 @@ rId: MB-19051801
 4. 移动代码到下一行(Keymap -> Main Menu -> Code -> Move Statement Down) ： Alt + 向下箭头 
 5. 删除一行(Keymap -> Editor Actions -> Delete Line) ： Ctrl + D    【速记：delete】 
 6. 调出代码提示(Keymap -> Main Menu -> Code -> Completion -> Basic) ： Alt + / 
-7. 自动补全返回变量(Keymap -> Main Menu -> Refactor -> Extract -> Variable...) ： Alt + Enter 
+7. 自动补全返回变量(Keymap -> Main Menu -> Refactor -> Extract -> Introduce Variable...) ： Alt + Enter 
 8. 显示代码在哪里被使用(Keymap -> Main Menu -> Edit -> Find -> Find Usages) ： Ctrl + U     【速记：Usage】 
 9. 代码格式化(Keymap -> Main Menu -> Code -> Reformat Code) ：Ctrl + Shift + F    【速记：format】 
 10. 重命名(Keymap -> Main Menu -> Refactor -> Rename...) ： Alt + Shift + R    【速记：refact】 
-11. 全局查找(Keymap -> Main Menu -> Edit -> Find -> Find in Path...)：Ctrl + P    【速记：path】 
+11. 全局查找(Keymap -> Main Menu -> Edit -> Find -> Find in Path...{新版本改名为Find in Files...})：Ctrl + P    【速记：path】 
 12. 返回或前进到上次光标所在处(Keymap -> Main Menu -> Navigate -> Back / Forward)：Alt + 向左箭头/向右箭头
 13. 显示层级关系(Keymap -> Main Menu -> Navigate -> Type Hierarchy)：Ctrl + H    【速记：hierarchy】 
-14. 定位到继承代码(Keymap -> Main Menu -> Navigate -> Implementation(s))：Ctrl + Alt + Button1 Click
+14. 定位到继承代码(Keymap -> Main Menu -> Navigate -> Implementation(s) {新版本改名为Go to Implementation(s)})：Ctrl + Alt + Button1 Click
 15. 定位到声明代码(Keymap -> Main Menu -> Navigate -> Declaration)：Ctrl + Button1 Click
 16. 删除Java文件不用的依赖(Keymap -> Main Menu -> Code -> Optimize Imports)：Ctrl + Shift + O
 17. 显示参数列表(Keymap  -> Main Menu -> View -> Parameter Info)：Alt + P    【速记：parameter】 
@@ -37,7 +37,7 @@ CTRL为基础组合键，与ALT相关的组合键通常是代码修改的辅助�
 
 ## 其他偏好设置
 
-1. 鼠标悬浮方法上方显示文档(Editor -> General => Show quick documentation on mouse move) ：打勾 
+1. 鼠标悬浮方法上方显示文档(Editor -> General => Show quick documentation on mouse move) ：打勾  {新版idea在Editor -> Code Editing}
 
 2. 自动为Java文件添加明确的导入依赖(Editor -> General -> Auto Import => Add unambiguous imports on the fly)：打勾
 
@@ -112,8 +112,11 @@ File => Settings... => Keymap页面中：搜索输入框用于输入匹配文字
 Linux：~/.IdeaIC2019.1/config/keymaps/
 Windows(2019版本)：C:/Users/Administrator/.IdeaIC2019.1/config/keymaps/
 Windows(2020版本)：C:/Users/Administrator/AppData/Roaming/JetBrains/IdeaIC2020.1/keymaps/
+Mac(2020版本)：~/Library/Application\ Support/JetBrains/IdeaIC2020.3/keymaps/
 ```
 配置文件（[我的配置文件](../static/Vince-Style.xml)、[我的配置文件2020版](../static/Vince-Style-2020.xml)）复制到上述相应目录后，重新启动IDEA，在快捷键配置页面（File => Settings... => Keymap）下拉框中即会增加新导入的配置文件，选中即可使用
+
+配置文件（[Mac版](../static/Vince-Style_Mac_.xml)）
 
 3. **项目太大，文件列表太长怎么办**
 
