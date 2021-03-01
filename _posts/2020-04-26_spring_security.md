@@ -18,7 +18,11 @@ rId: MB-20042601
 5. 什么是CSRF攻击，Security是否支持CSRF攻击的防范？
 6. 如何利用Security自带的Oauth封装，快速搭建常见网站的（常规风格的）Oauth客户端支持？
 
-## （一）配置文件简单示例
+## （一）Spring Security框架结构
+
+![image-20210301120639337](../static/MB20042601-1.png)
+
+## （二）配置文件简单示例
 
 继承WebSecurityConfigureAdapter类，加上@EnableWebSecurity注解，并实现configure方法（注意这个方法有三种入参形式，下面只是其中一种，后面的篇幅中会看到另外一种），下面只是一个简单的配置文件，仅配置了一些简单的URL路径相关的权限。
 
@@ -43,7 +47,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 
 
-## （二）登录功能
+## （三）登录功能
 
 spring security已经帮你完成了登录验证的代码，无需再在controller中进行编码。
 
@@ -372,7 +376,7 @@ public class LoginServiceImpl implements LoginService {
 
 案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-login-3.1](https://github.com/Uetty/spring-boot-clean/tree/security-login-3.1)
 
-## （三）自定义登录接口的响应返回值
+## （四）自定义登录接口的响应返回值
 
 有时候我们需要判断是接口请求还是页面请求来定义返回json还是页面，就需要自定义响应内容。自定义登录响应有两种方法，一种就是像第二节案例(Ⅰ)一样，将成功的url和失败的url指向controller接口处理。
 
@@ -504,7 +508,7 @@ public class AuthenticationHandler implements AuthenticationFailureHandler, Auth
 
 案例地址：[https://github.com/Uetty/spring-boot-clean/tree/security-output-1.1](https://github.com/Uetty/spring-boot-clean/tree/security-output-1.1)
 
-## （四）添加自定义Filter
+## （五）添加自定义Filter
 
 有时候，现有Filter不能满足我们的实际需要，我们需要添加自定义的filter，如：添加验证码校验功能的filter时，需要在`UsernamePasswordAuthenticationFilter`前增加一个自定义的过滤器。
 
@@ -556,7 +560,7 @@ public class PreLoginFilter extends OncePerRequestFilter {
     }
 }
 ```
-## （五）权限认证的配置及自定义
+## （六）权限认证的配置及自定义
 
 ### （Ⅰ）权限模型
 
@@ -790,7 +794,7 @@ public Account post(Account account, double amount);
 通过注解方式配置的Security，默认的Voter不再一定是`WebExpressionVoter`，根据项目内包含的注解的不同，会有所不同。
 
 
-## （六） Spring Security拥有的其他特性
+## （七） Spring Security拥有的其他特性
 
 ### （Ⅰ）CSRF安全
 
