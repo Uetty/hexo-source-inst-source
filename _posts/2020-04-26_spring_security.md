@@ -158,7 +158,7 @@ public class SecurityConfigure extends WebSecurityConfigurerAdapter {
 
 ### （Ⅲ）自定义登录验证
 
-Security使用了Servlet规范的过滤器（Filter）与过滤链（FilterChain）来组织自身的结构，整个Security框架主要功能由多个过滤器堆叠串联而成，每个过滤器负责了一个特定的功能。如Session层过滤器、请求头处理过滤器、登出逻辑处理过滤器、缓存处理层过滤器等，一般会有至少十一个过滤器存在。登录处理层也是其中的一个过滤器，一般置于登出处理过滤器之后，位于第5位。
+如前面Security架构图所示，Security使用了Servlet规范的过滤器（Filter）与过滤链（FilterChain）来组织自身的结构，整个Security框架主要功能由多个过滤器堆叠串联而成，每个过滤器负责了一个特定的功能。如Session层过滤器、请求头处理过滤器、登出逻辑处理过滤器、缓存处理层过滤器等，一般会有至少十一个过滤器存在。登录处理层也是其中的一个过滤器，一般置于登出处理过滤器之后，位于第5位。
 
 在登录层，较常使用的是`UsernamePasswordAuthenticationFilter`过滤器，即基于用户名密码的过滤器。为了能够满足多种多样的需求，Security在`UsernamePasswordAuthenticationFilter`过滤器内部的不同层次均暴露了接口，框架使用者能够根据需要自定义实现任意某一层的接口，下面基于它介绍各层接口：
 
@@ -176,7 +176,7 @@ Security使用了Servlet规范的过滤器（Filter）与过滤链（FilterChain
 
    ​    4) 登录成功后，需要调用`SecurityContextHolder.getContext().setAuthentication( authentication )`设置认证信息。
 
-2. **AuthenticationManager**：`AbstractAuthenticationProcessingFilter`中的登录逻辑主要委托给了`AuthenticationManager`认证管理器接口，**默认的认证管理器接口的实现类是`ProviderManager`认证提供者管理器类**，`ProviderManager`允许有父级`AuthenticationManager`存在，本机`ProviderManager`不能处理的时候，才会交给父级`ProviderMananger`尝试处理。默认情况下，第一级`ProviderMananger`是负责处理`AnonymousAuthenticationToken`的`ProviderManager`，而`UsernamePasswordAuthenticationToken`是由其父级`ProviderMananger`处理。由于`AuthenticationManager`本身并没有什么功能，所以比较少会有自定义该类的需求，鉴于此，就不再介绍自定义的实现了。若需要进行自定义，配置`SecurityConfigure`中配置的方式是`auth.parentAuthenticationManager(authenticationManager);`，即设置自定义的父级`AuthenticationManager`。
+2. **AuthenticationManager**：见前面结构图。`AbstractAuthenticationProcessingFilter`中的登录逻辑主要委托给了`AuthenticationManager`认证管理器接口，**默认的认证管理器接口的实现类是`ProviderManager`认证提供者管理器类**，`ProviderManager`允许有父级`AuthenticationManager`存在，本机`ProviderManager`不能处理的时候，才会交给父级`ProviderMananger`尝试处理。默认情况下，第一级`ProviderMananger`是负责处理`AnonymousAuthenticationToken`的`ProviderManager`，而`UsernamePasswordAuthenticationToken`是由其父级`ProviderMananger`处理。由于`AuthenticationManager`本身并没有什么功能，所以比较少会有自定义该类的需求，鉴于此，就不再介绍自定义的实现了。若需要进行自定义，配置`SecurityConfigure`中配置的方式是`auth.parentAuthenticationManager(authenticationManager);`，即设置自定义的父级`AuthenticationManager`。
 
 3. **AuthenticationProvider**：`ProviderManager`认证提供者管理器类，顾名思义，管理了多个认证提供者`AuthenticationProvider`。前面说过`UsernamePasswordAuthenticationFilter`定义了`Authentication`实例的类型，这个类型在这里起到了作用：每一个认证提供者可能支持给当前的登录过滤器提供认证也可能不支持，是否支持的判定就是由`Authentication`实例的类型决定。遇到任意一个认证提供者`AuthenticationProvider`支持提供认证，并且判定认证成功，均判定为登录成功。
 
