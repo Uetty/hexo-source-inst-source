@@ -3,7 +3,7 @@ title: JAVAP 反汇编字节码案例
 date: 2019-06-12 19:58:49
 tags: java
 permalink: javap-example
-keywords: javap, jvm
+keywords: javap, jvm, 字节码
 rId: MB-19061201
 ---
 
@@ -217,5 +217,4 @@ public static void test(Integer a, Integer b) {
 ```
 
 正常输出结果：6--null
-
 
